@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solana Autonomous Capital Agent & MultiHopper Privacy Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --solana-purple: #9945FF;
+      --solana-green: #14F195;
+      --solana-gradient: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-cyan: #06b6d4;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(153, 69, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(20, 241, 149, 0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 28px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--solana-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(153, 69, 255, 0.35);
+      font-weight: 800;
+      font-size: 20px;
+      color: #0b0f19;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(20, 241, 149, 0.1);
+      color: var(--solana-green);
+      border: 1px solid rgba(20, 241, 149, 0.25);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--solana-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--solana-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(153, 69, 255, 0.3);
+    }
+
+    .card-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-subtext {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      word-break: break-all;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary {
+      background: var(--solana-gradient);
+      color: #0b0f19;
+      box-shadow: 0 4px 15px rgba(20, 241, 149, 0.25);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .route-viz {
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    .hop-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 80px;
+    }
+
+    .hop-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(153, 69, 255, 0.15);
+      border: 1px solid var(--solana-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .hop-bubble.active {
+      background: var(--solana-green);
+      color: #0b0f19;
+      border-color: var(--solana-green);
+      box-shadow: 0 0 15px rgba(20, 241, 149, 0.4);
+    }
+
+    .hop-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+
+    .hop-arrow {
+      color: var(--text-muted);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .guardrail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+    }
+
+    .guardrail-row:last-child {
+      border-bottom: none;
+    }
+
+    .guardrail-label {
+      color: var(--text-muted);
+    }
+
+    .guardrail-val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .badge-ok {
+      color: var(--solana-green);
+      background: rgba(20, 241, 149, 0.12);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--solana-gradient);
+      width: 30%;
+      transition: width 0.3s ease;
+    }
+
+    .log-box {
+      background: #060911;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      min-width: 75px;
+    }
+
+    .log-success { color: var(--solana-green); }
+    .log-warn { color: var(--accent-amber); }
+    .log-err { color: var(--accent-red); }
+    .log-info { color: var(--accent-cyan); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-area">
+        <div class="logo-badge">MH</div>
+        <div>
+          <h1>Autonomous Capital Agent</h1>
+          <div class="tagline">OOBE Protocol Risk Guardrails & MultiHopper Multi-Hop Privacy Engine (Solana)</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="pill">
+          <div class="pulse-dot"></div>
+          Active Daemon &bull; Devnet
+        </div>
+        <button class="btn btn-danger" id="circuitBtn" onclick="toggleCircuitBreaker()">Emergency Stop</button>
+      </div>
+    </header>
+
+    <!-- Top KPI Row -->
+    <div class="grid-top">
+      <div class="card">
+        <div class="card-title">Agent Keypair Address</div>
+        <div class="card-value" style="font-size: 18px;">9fR9R4...ZfsS</div>
+        <div class="card-subtext">9fR9R4VQfa1Y3EDxHAW5bh7P7zUQpd46JrVftNn8ZfsS</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Operational Balance</div>
+        <div class="card-value" id="solBalance">2.50 SOL</div>
+        <div class="card-subtext">Threshold: 2.0 SOL &bull; Reserve: 1.0 SOL</div>
+      </div>
+      <div class="card">
+        <div class="card-title">24H Rolling Spend Limit</div>
+        <div class="card-value" id="spendRatio">1.50 / 5.00 SOL</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="spendFill" style="width: 30%;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">MultiHopper Privacy Status</div>
+        <div class="card-value" style="color: var(--solana-green);">5 Hops Active</div>
+        <div class="card-subtext">Fee: 50 bps &bull; Base route verified</div>
+      </div>
+    </div>
+
+    <!-- Main 2-column layout -->
+    <div class="main-layout">
+      <!-- Left: Guardrail Status & Trigger Rules -->
+      <div class="card">
+        <div class="section-title">
+          <span>🛡️</span> OOBE Risk Guardrail Engine
+        </div>
+
+        <div class="guardrail-row">
+          <span class="guardrail-label">Max Per-Transaction Limit</span>
+          <span class="guardrail-val">1.000000000 SOL (1.0 SOL)</span>
+        </div>
+        <div class="guardrail-row">
+          <span class="guardrail-label">24-Hour Rolling Budget Cap</span>
+          <span class="guardrail-val">5.000000000 SOL (5.0 SOL)</span>
+        </div>
+        <div class="guardrail-row">
+          <span class="guardrail-label">Permitted Token Mints</span>
+          <span class="guardrail-val"><span class="badge-ok">Native SOL</span> <span class="badge-ok">USDC</span></span>
+        </div>
+        <div class="guardrail-row">
+          <span class="guardrail-label">Recipient Whitelist Verification</span>
+          <span class="guardrail-val"><span class="badge-ok">ENFORCED</span></span>
+        </div>
+        <div class="guardrail-row">
+          <span class="guardrail-label">Maximum Acceptable Fee</span>
+          <span class="guardrail-val">100 bps (1.00%)</span>
+        </div>
+        <div class="guardrail-row">
+          <span class="guardrail-label">Circuit Breaker Status</span>
+          <span class="guardrail-val" id="circuitStatus" style="color: var(--solana-green);">NORMAL (ARMED)</span>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--card-border);">
+          <div class="section-title" style="margin-bottom: 12px; font-size: 15px;">
+            <span>⚡</span> Active Autonomous Trigger
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+            <strong>Rule:</strong> Sweep Surplus Treasury<br>
+            <strong>Condition:</strong> If Balance &gt; 2.0 SOL &rarr; Route (Balance - 1.0 SOL) surplus to Cold Treasury via 5-hop MultiHopper relay.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: MultiHopper Routing Visualizer & Simulator -->
+      <div class="card">
+        <div class="section-title">
+          <span>🔀</span> MultiHopper Visual Route Planner
+        </div>
+
+        <div class="route-viz" id="routeViz">
+          <div class="hop-node">
+            <div class="hop-bubble active">Agent</div>
+            <div class="hop-name">Origin</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble">H1</div>
+            <div class="hop-name">PDA-1</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble">H2</div>
+            <div class="hop-name">PDA-2</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble">H3</div>
+            <div class="hop-name">PDA-3</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble">H4</div>
+            <div class="hop-name">PDA-4</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble">H5</div>
+            <div class="hop-name">PDA-5</div>
+          </div>
+          <div class="hop-arrow">&rarr;</div>
+          <div class="hop-node">
+            <div class="hop-bubble active" style="border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.2); color: #fff;">Vault</div>
+            <div class="hop-name">Cold Storage</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 18px;">
+          <button class="btn btn-primary" style="flex: 1;" onclick="simulateCycle()">Simulate Trigger Execution</button>
+          <button class="btn" style="background: rgba(255,255,255,0.08); color: #fff;" onclick="testViolation()">Test Guardrail Rejection</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom: Real-time Execution Audit Log -->
+    <div class="card">
+      <div class="section-title">
+        <span>📜</span> Autonomous Execution & Audit Stream
+      </div>
+      <div class="log-box" id="auditLog">
+        <div class="log-entry">
+          <span class="log-time">[03:35:12]</span>
+          <span class="log-info">[INIT] Autonomous Capital Agent initialized with Keypair: 9fR9R4VQfa1Y3EDxHAW5bh7P7zUQpd46JrVftNn8ZfsS</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[03:35:12]</span>
+          <span class="log-info">[INIT] MultiHopper privacy client connected (SDK v1.0). Target hops: 5.</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[03:35:12]</span>
+          <span class="log-info">[GUARDRAIL] Risk engine loaded: 1.0 SOL max single tx, 5.0 SOL 24h rolling budget.</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[03:36:01]</span>
+          <span class="log-success">[CYCLE] Operational balance evaluated: 2.50 SOL &gt; 2.00 SOL threshold.</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[03:36:02]</span>
+          <span class="log-success">[SWEEP] Guardrail verified. Initiated 5-hop privacy route for 1.50 SOL. Transfer ID: mh_mock_k83n19x</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[03:36:03]</span>
+          <span class="log-success">[SIGN] Transaction bundles signed: Keeper funding & Orchestrator initialized. Broadcast CONFIRMED.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isPaused = false;
+    let spent = 1.5;
+    const maxBudget = 5.0;
+
+    function formatTime() {
+      const now = new Date();
+      return `[${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}]`;
+    }
+
+    function addLog(type, msg) {
+      const logBox = document.getElementById('auditLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">${formatTime()}</span> <span class="log-${type}">${msg}</span>`;
+      logBox.appendChild(entry);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function toggleCircuitBreaker() {
+      isPaused = !isPaused;
+      const btn = document.getElementById('circuitBtn');
+      const status = document.getElementById('circuitStatus');
+      if (isPaused) {
+        btn.textContent = 'Resume Agent';
+        btn.style.background = 'rgba(20, 241, 149, 0.2)';
+        btn.style.color = '#14F195';
+        status.textContent = 'PAUSED (TRIPPED)';
+        status.style.color = 'var(--accent-red)';
+        addLog('err', '[CIRCUIT BREAKER] Emergency stop triggered! Agent halted from executing any transactions.');
+      } else {
+        btn.textContent = 'Emergency Stop';
+        btn.style.background = 'rgba(239, 68, 68, 0.15)';
+        btn.style.color = 'var(--accent-red)';
+        status.textContent = 'NORMAL (ARMED)';
+        status.style.color = 'var(--solana-green)';
+        addLog('info', '[CIRCUIT BREAKER] Circuit breaker disarmed. Agent resumed autonomous operation.');
+      }
+    }
+
+    function simulateCycle() {
+      if (isPaused) {
+        addLog('warn', '[REJECTED] Cannot execute cycle: Emergency circuit breaker is currently active.');
+        return;
+      }
+
+      addLog('info', '[EVALUATION] Checking on-chain balances: 2.85 SOL detected (Threshold: 2.0 SOL).');
+      setTimeout(() => {
+        addLog('info', '[GUARDRAIL] Pre-validating 0.85 SOL surplus transfer to TreasuryVault11111111111111111111111111111...');
+        spent += 0.85;
+        const pct = Math.min(100, Math.round((spent / maxBudget) * 100));
+        document.getElementById('spendFill').style.width = pct + '%';
+        document.getElementById('spendRatio').textContent = `${spent.toFixed(2)} / 5.00 SOL`;
+
+        const transferId = 'mh_mock_' + Math.random().toString(36).substring(2, 9);
+        addLog('success', `[MULTI-HOPPER] Route prepared across 5 anonymizing ephemeral PDA hops. Transfer ID: ${transferId}`);
+        addLog('success', `[BROADCAST] All transaction bundles signed with Ed25519 keypair and confirmed.`);
+      }, 400);
+    }
+
+    function testViolation() {
+      addLog('warn', '[SIMULATION] Attempting unauthorized transfer to unverified address 0xHackerPhish999999999999999...');
+      setTimeout(() => {
+        addLog('err', '[GUARDRAIL VIOLATION] Rejected: Recipient 0xHackerPhish999999999999999 is not in approved allowlist.');
+      }, 300);
+    }
+  </script>
+</body>
+</html>
