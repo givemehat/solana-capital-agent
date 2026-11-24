@@ -1,0 +1,30 @@
+{
+  "name": "solana-capital-agent",
+  "version": "1.0.0",
+  "description": "Autonomous Capital & MultiHopper Privacy Routing Agent on Solana",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "agent:start": "tsx src/cli.ts start",
+    "agent:status": "tsx src/cli.ts status",
+    "agent:simulate": "tsx src/cli.ts simulate"
+  },
+  "keywords": ["solana", "agent", "multihopper", "capital", "superteam", "defi"],
+  "author": "givemehat",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.99.0",
+    "bs58": "^6.0.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
